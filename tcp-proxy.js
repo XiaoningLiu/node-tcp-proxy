@@ -1,4 +1,6 @@
 var net = require("net");
+var fs = require('fs');
+var tls = require('tls');
 
 function uniqueKey(socket) {
     var key = socket.remoteAddress + ":" + socket.remotePort;
@@ -25,7 +27,10 @@ TcpProxy.prototype.createProxy = function() {
     this.log("proxy listening at port " + this.proxyPort);
 
     const proxy = this;
-    proxy.server = net.createServer(function(proxySocket) {
+    proxy.server = tls.createServer({
+        key: fs.readFileSync('cert.key'),
+        cert: fs.readFileSync('cert.pem')
+    }, function(proxySocket) {
         var key = uniqueKey(proxySocket);
         proxy.log("client connected from " + key);
         proxy.proxySockets[key] = proxySocket;
